@@ -970,10 +970,7 @@ MmInitializeProcessAddressSpace(IN PEPROCESS Process,
     KeInitializeGuardedMutex(&Process->AddressCreationLock);
     Process->Vm.WorkingSetExpansionLinks.Flink = NULL;
     
-/* Initialize AVL tree */
-    ASSERT(Process->VadRoot.NumberGenericTableElements == 0);
-
-    /* * SANITY CHECK: 
+/* * SANITY CHECK: 
      * Ensure the VAD root is not already initialized and has no elements.
      * This prevents memory corruption before we set the initial self-reference.
      */
@@ -983,9 +980,16 @@ MmInitializeProcessAddressSpace(IN PEPROCESS Process,
         return STATUS_ADDRESS_ALREADY_EXISTS;
     }
 
+    /* Initialize AVL tree */
+    ASSERT(Process->VadRoot.NumberGenericTableElements == 0);
+    RtlInitializeGenericTableAvl(&Process->VadRoot,
+                                 (PRTL_GENERIC_COMPARE_ROUTINE)MiCompareVads,
+                                 (PRTL_GENERIC_ALLOCATE_ROUTINE)MiAllocateVad,
+                                 (PRTL_GENERIC_FREE_ROUTINE)MiFreeVad,
+                                 NULL);
+
     /* Initialize the BalancedRoot's parent to itself (Standard NT behavior) */
     Process->VadRoot.BalancedRoot.u1.Parent = &Process->VadRoot.BalancedRoot;
-
     /* Lock our working set */
     MiLockProcessWorkingSet(Process, PsGetCurrentThread());
 
