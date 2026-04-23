@@ -970,8 +970,7 @@ MmInitializeProcessAddressSpace(IN PEPROCESS Process,
     KeInitializeGuardedMutex(&Process->AddressCreationLock);
     Process->Vm.WorkingSetExpansionLinks.Flink = NULL;
     
-/* * SANITY CHECK: 
-     * Ensure the VAD root is not already initialized and has no elements.
+    /* SANITY CHECK: Ensure the VAD root is not already initialized and has no elements.
      * This prevents memory corruption before we set the initial self-reference.
      */
     if (Process->VadRoot.NumberGenericTableElements != 0)
