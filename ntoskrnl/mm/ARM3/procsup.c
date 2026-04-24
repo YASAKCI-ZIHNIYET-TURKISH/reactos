@@ -966,18 +966,9 @@ MmInitializeProcessAddressSpace(IN PEPROCESS Process,
     ASSERT(Process->AddressSpaceInitialized <= 1);
     Process->AddressSpaceInitialized = 2;
 
-    /* Initialize the Addresss Space lock */
+/* Initialize the Address Space lock */
     KeInitializeGuardedMutex(&Process->AddressCreationLock);
     Process->Vm.WorkingSetExpansionLinks.Flink = NULL;
-    
-    /* SANITY CHECK: Ensure the VAD root is not already initialized and has no elements.
-     * This prevents memory corruption before we set the initial self-reference.
-     */
-    if (Process->VadRoot.NumberGenericTableElements != 0)
-    {
-        DPRINT1("MM-ARM3: VAD root consistency check failed for process %p\n", Process);
-        return STATUS_ADDRESS_ALREADY_EXISTS;
-    }
 
     /* Initialize AVL tree */
     ASSERT(Process->VadRoot.NumberGenericTableElements == 0);
@@ -989,9 +980,9 @@ MmInitializeProcessAddressSpace(IN PEPROCESS Process,
 
     /* Initialize the BalancedRoot's parent to itself (Standard NT behavior) */
     Process->VadRoot.BalancedRoot.u1.Parent = &Process->VadRoot.BalancedRoot;
+    
     /* Lock our working set */
     MiLockProcessWorkingSet(Process, PsGetCurrentThread());
-
     /* Lock PFN database */
     OldIrql = MiAcquirePfnLock();
 
