@@ -972,15 +972,8 @@ MmInitializeProcessAddressSpace(IN PEPROCESS Process,
 
     /* Initialize AVL tree */
     ASSERT(Process->VadRoot.NumberGenericTableElements == 0);
-    RtlInitializeGenericTableAvl(&Process->VadRoot,
-                                 (PRTL_GENERIC_COMPARE_ROUTINE)MiCompareVads,
-                                 (PRTL_GENERIC_ALLOCATE_ROUTINE)MiAllocateVad,
-                                 (PRTL_GENERIC_FREE_ROUTINE)MiFreeVad,
-                                 NULL);
-
-    /* Initialize the BalancedRoot's parent to itself (Standard NT behavior) */
     Process->VadRoot.BalancedRoot.u1.Parent = &Process->VadRoot.BalancedRoot;
-    
+
     /* Lock our working set */
     MiLockProcessWorkingSet(Process, PsGetCurrentThread());
     /* Lock PFN database */
